@@ -422,6 +422,7 @@ footer b{font:italic 500 1.25rem var(--serif);color:var(--ivory)}
         <label>Venue or location<input name="venue" autocomplete="off"></label>
       </div>
       <label>Anything else we should know?<textarea name="msg"></textarea></label>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <button class="btn gold" type="submit">Send on WhatsApp</button>
       <p id="status" role="status"></p>
     </form>
@@ -456,8 +457,25 @@ footer b{font:italic 500 1.25rem var(--serif);color:var(--ivory)}
     if(d.get('venue').trim()) L.push('Venue: '+d.get('venue').trim());
     if(d.get('msg').trim()) L.push('Notes: '+d.get('msg').trim());
     var url='https://wa.me/233550464604?text='+encodeURIComponent(L.join('\n'));
+    if(d.get('_honey')){ return; }
+    var emailed=false;
     status.innerHTML='Opening WhatsApp. If nothing opens, <a href="'+url+'" target="_blank" rel="noopener">tap here</a> or call 0550 464 604.';
     window.open(url,'_blank','noopener');
+    fetch('https://formsubmit.co/ajax/eventurephotoboothsgh@gmail.com',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        _subject:'New Eventure booking enquiry: '+d.get('pick')+' ('+d.get('name').trim()+')',
+        _template:'table',
+        _captcha:'false',
+        Name:d.get('name').trim(),
+        Phone:d.get('phone').trim(),
+        'Booth or bundle':d.get('pick'),
+        'Event date':d.get('date'),
+        Venue:d.get('venue').trim(),
+        Notes:d.get('msg').trim()
+      })
+    }).then(function(r){ if(r.ok){ status.innerHTML+=' Your request was also emailed to us.'; } }).catch(function(){});
   });
 })();
 </script>
